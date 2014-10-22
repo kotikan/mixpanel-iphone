@@ -275,19 +275,6 @@ static Mixpanel *sharedInstance = nil;
                                name:@"com.parse.bolts.measurement_event"
                              object:nil];
 
-#ifndef DISABLE_MIXPANEL_AB_DESIGNER
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UILongPressGestureRecognizer *recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(connectGestureRecognized:)];
-        recognizer.minimumPressDuration = 3;
-        recognizer.cancelsTouchesInView = NO;
-#if TARGET_IPHONE_SIMULATOR
-        recognizer.numberOfTouchesRequired = 2;
-#else
-        recognizer.numberOfTouchesRequired = 4;
-#endif
-        [[UIApplication sharedApplication].keyWindow addGestureRecognizer:recognizer];
-    });
-#endif
 }
 
 - (NSString *)description
@@ -1555,13 +1542,6 @@ static Mixpanel *sharedInstance = nil;
 }
 
 #pragma mark - A/B Testing (Designer)
-
-- (void)connectGestureRecognized:(id)sender
-{
-    if(!sender || ([sender isKindOfClass:[UIGestureRecognizer class]] && ((UIGestureRecognizer *)sender).state == UIGestureRecognizerStateBegan )) {
-        [self connectToABTestDesigner];
-    }
-}
 
 - (void)connectToABTestDesigner
 {

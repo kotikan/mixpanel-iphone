@@ -619,6 +619,8 @@
  */
 - (void)showNotification;
 
+- (void)connectToABTestDesigner;
+
 /*!
  @method
 
