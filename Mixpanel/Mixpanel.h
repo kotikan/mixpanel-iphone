@@ -635,6 +635,8 @@
  */
 - (void)joinExperiments;
 
+- (void)connectToABTestDesigner;
+
 /*!
  @method
  
