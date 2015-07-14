@@ -7,17 +7,16 @@
 //
 
 #import <XCTest/XCTest.h>
-
-#import "Mixpanel.h"
-#import "MPSwizzler.h"
-#import "MPVariant.h"
-#import "MPObjectSelector.h"
 #import "HomeViewController.h"
 #import "HTTPServer.h"
+#import "Mixpanel.h"
 #import "MixpanelDummyDecideConnection.h"
-#import "MPValueTransformers.h"
-#import "NSData+MPBase64.h"
 #import "MPCategoryHelpers.h"
+#import "MPObjectSelector.h"
+#import "MPSwizzler.h"
+#import "MPValueTransformers.h"
+#import "MPVariant.h"
+#import "NSData+MPBase64.h"
 
 #define TEST_TOKEN @"abc123"
 
@@ -29,6 +28,7 @@
 
 @property (atomic, copy) NSString *decideURL;
 @property (nonatomic, strong) NSSet *variants;
+@property (nonatomic, retain) NSMutableArray *eventsQueue;
 @property (atomic, strong) NSDictionary *superProperties;
 
 - (void)checkForDecideResponseWithCompletion:(void (^)(NSArray *surveys, NSArray *notifications, NSSet *variants, NSSet *eventBindings))completion;
@@ -92,7 +92,7 @@
  version of XCTest does not support asynchonous tests and
  will not compile unless we define these symbols
  */
-#if !__has_include("XCTest/XCTextCase+AsynchronousTesting.h")
+#if !__has_include("XCTest/XCTestCase+AsynchronousTesting.h")
 @interface XCTestExpectation
 
 - (void)fulfill;
@@ -482,6 +482,13 @@
             XCTAssertEqual([self.mixpanel.variants count], (uint)2, @"no variants found");
             XCTAssertNotNil(self.mixpanel.superProperties[@"$experiments"], @"$experiments super property should not be nil");
             XCTAssert([self.mixpanel.superProperties[@"$experiments"][@"1"] isEqualToNumber:@1], @"super properties should have { 1: 1 }");
+
+            XCTAssertTrue(self.mixpanel.eventsQueue.count == 2, @"$experiment_started events not tracked");
+            for (NSDictionary *event in self.mixpanel.eventsQueue) {
+                XCTAssertTrue([(NSString *)event[@"event"] isEqualToString:@"$experiment_started"], @"incorrect event name");
+                XCTAssertNotNil(event[@"properties"][@"$experiments"], @"$experiments super-property not set on $experiment_started event");
+            }
+
             [expect fulfill];
         });
         [self waitForExpectationsWithTimeout:2 handler:nil];
@@ -560,19 +567,19 @@
 - (void)testMpHelpers
 {
     UIView *v1 = [[UIView alloc] init];
-    
+
     XCTAssert([v1 respondsToSelector:@selector(mp_fingerprintVersion)]);
     XCTAssert([v1 mp_fingerprintVersion] == 1);
-    
+
     XCTAssert([v1 respondsToSelector:@selector(mp_varA)]);
     XCTAssert([v1 respondsToSelector:@selector(mp_varB)]);
     XCTAssert([v1 respondsToSelector:@selector(mp_varC)]);
     XCTAssert([v1 respondsToSelector:@selector(mp_varSetD)]);
     XCTAssert([v1 respondsToSelector:@selector(mp_varE)]);
-    
+
     XCTAssert([v1 respondsToSelector:@selector(mp_snapshotForBlur)]);
     XCTAssert([v1 respondsToSelector:@selector(mp_snapshotImage)]);
-    
+
     XCTAssertFalse([v1 respondsToSelector:@selector(mp_nonexistant)]);
 }
 
