@@ -633,6 +633,14 @@
 
 /*!
  @method
+ 
+ @abstract
+ Connect to ABTestDesigner
+ */
+- (void)connectToABTestDesigner;
+
+/*!
+ @method
 
  @abstract
  Join any experiments (A/B tests) that are available for the current user.

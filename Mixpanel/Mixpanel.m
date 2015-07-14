@@ -181,9 +181,6 @@ static Mixpanel *sharedInstance = nil;
 #if !defined(MIXPANEL_APP_EXTENSION)
         [self executeCachedVariants];
         [self executeCachedEventBindings];
-#if defined(DEBUG) && !defined(DISABLE_MIXPANEL_AB_DESIGNER)
-        [self connectToABTestDesigner:YES];
-#endif
 #endif
 
         if (launchOptions && launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
@@ -1030,20 +1027,6 @@ static __unused NSString *MPURLEncode(NSString *s)
                            selector:@selector(appLinksNotificationRaised:)
                                name:@"com.parse.bolts.measurement_event"
                              object:nil];
-
-#if !defined(DISABLE_MIXPANEL_AB_DESIGNER)
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UILongPressGestureRecognizer *recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(connectGestureRecognized:)];
-        recognizer.minimumPressDuration = 3;
-        recognizer.cancelsTouchesInView = NO;
-#if TARGET_IPHONE_SIMULATOR
-        recognizer.numberOfTouchesRequired = 2;
-#else
-        recognizer.numberOfTouchesRequired = 4;
-#endif
-        [[UIApplication sharedApplication].keyWindow addGestureRecognizer:recognizer];
-    });
-#endif
 }
 
 static void MixpanelReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
